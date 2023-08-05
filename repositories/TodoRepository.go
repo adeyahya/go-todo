@@ -24,7 +24,7 @@ func (r *TodoRepository) List(limit int, cursor string) models.Paginated[models.
 		rows, _ = r.Query(`
 			SELECT id, title, is_completed, created_at FROM todo
 			WHERE created_at < $1
-			ORDER BY created_at ASC
+			ORDER BY created_at DESC
 			LIMIT $2
 		`, cursor, limit)
 	}
