@@ -10,13 +10,9 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 )
 
-type IServiceContainer interface {
-	InjectTodoHandler() handlers.TodoHandler
+type kernel struct {
+	Db *sql.DB
 }
-
-type kernel struct{}
-
-var DB *sql.DB
 
 func SetupDatabase() {
 	// database migration
@@ -25,18 +21,10 @@ func SetupDatabase() {
 		log.Fatal(initMigrationError)
 	}
 	m.Up()
-
-	// init database
-	db, dbErr := sql.Open("sqlite", "./database/data.db")
-	if dbErr != nil {
-		log.Fatal(dbErr)
-	}
-	DB = db
-	defer db.Close()
 }
 
 func (k *kernel) InjectTodoHandler() handlers.TodoHandler {
-	todoRepository := repositories.TodoRepository{DB: DB}
+	todoRepository := repositories.TodoRepository{DB: k.Db}
 	todoHandler := handlers.TodoHandler{TodoRepository: &todoRepository}
 
 	return todoHandler
@@ -47,10 +35,15 @@ var (
 	containerOnce sync.Once
 )
 
-func ServiceContainer() IServiceContainer {
+func ServiceContainer() *kernel {
 	if k == nil {
 		containerOnce.Do(func() {
 			k = &kernel{}
+			db, dbErr := sql.Open("sqlite", "./database/data.db")
+			if dbErr != nil {
+				log.Fatal(dbErr)
+			}
+			k.Db = db
 		})
 	}
 

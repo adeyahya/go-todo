@@ -13,6 +13,10 @@ type Todo struct {
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
+type TodoRequestDTO struct {
+	Title string `json:"title"`
+}
+
 func (s Todo) New(title string) Todo {
 	return Todo{
 		Id:          uuid.NewString(),

@@ -12,12 +12,16 @@ import (
 
 func main() {
 	SetupDatabase()
+	kernel := ServiceContainer()
+	defer kernel.Db.Close()
 
-	todoHandler := ServiceContainer().InjectTodoHandler()
+	// handlers
+	todoHandler := kernel.InjectTodoHandler()
 
 	router := mux.NewRouter()
-
 	router.HandleFunc("/todo", todoHandler.List).Methods(http.MethodGet)
+	router.HandleFunc("/todo", todoHandler.Create).Methods(http.MethodPost)
+	router.HandleFunc("/todo/{id}", todoHandler.Get).Methods(http.MethodGet)
 
 	log.Println("API is running!")
 	http.ListenAndServe(":4000", router)
