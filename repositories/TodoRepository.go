@@ -49,7 +49,9 @@ func (r *TodoRepository) List(limit int, cursor string) models.Paginated[models.
 }
 
 func (r *TodoRepository) Get(id string) (*models.Todo, error) {
-	row := r.QueryRow("SELECT id, title, is_completed, created_at FROM todo where id = ?", id)
+	row := r.QueryRow(`
+		SELECT id, title, is_completed, created_at FROM todo where id = $1
+	`, id)
 	var todo models.Todo
 
 	err := row.Scan(&todo.Id, &todo.Title, &todo.IsCompleted, &todo.CreatedAt)
@@ -62,7 +64,11 @@ func (r *TodoRepository) Get(id string) (*models.Todo, error) {
 
 func (r *TodoRepository) Create(title string) (*models.Todo, error) {
 	id := uuid.NewString()
-	_, err := r.Exec("INSERT INTO todo(id, title, is_completed, created_at) values(?, ?, ?, ?)", id, title, false, time.Now())
+	_, err := r.Exec(`
+		INSERT INTO todo(id, title, is_completed, created_at)
+		values($1, $2, $3, $4)`,
+		id, title, false, time.Now(),
+	)
 
 	if err != nil {
 		return nil, err
