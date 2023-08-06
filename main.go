@@ -26,6 +26,8 @@ func main() {
 	router.HandleFunc("/todo", todoHandler.List).Methods(http.MethodGet)
 	router.HandleFunc("/todo", todoHandler.Create).Methods(http.MethodPost)
 	router.HandleFunc("/todo/{id}", todoHandler.Get).Methods(http.MethodGet)
+	router.HandleFunc("/todo/{id}/done", todoHandler.Done).Methods(http.MethodPatch)
+	router.HandleFunc("/todo/{id}/undone", todoHandler.Undone).Methods(http.MethodPatch)
 
 	log.Println("API is running!")
 	http.ListenAndServe(":4000", muxHandlers.CompressHandler(router))

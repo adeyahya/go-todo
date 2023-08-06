@@ -12,21 +12,26 @@ type TodoRepository struct {
 	*sql.DB
 }
 
-func (r *TodoRepository) List(limit int, cursor string) models.Paginated[models.Todo] {
+func (r *TodoRepository) List(limit int, cursor string) (*models.Paginated[models.Todo], error) {
 	var rows *sql.Rows
+	var err error
 	if cursor == "" {
-		rows, _ = r.Query(`
+		rows, err = r.Query(`
 			SELECT id, title, is_completed, created_at FROM todo
 			ORDER BY created_at DESC
 			LIMIT $1
 		`, limit)
 	} else {
-		rows, _ = r.Query(`
+		rows, err = r.Query(`
 			SELECT id, title, is_completed, created_at FROM todo
 			WHERE created_at < $1
 			ORDER BY created_at DESC
 			LIMIT $2
 		`, cursor, limit)
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -45,7 +50,7 @@ func (r *TodoRepository) List(limit int, cursor string) models.Paginated[models.
 		Data:   &todoList,
 	}
 
-	return result
+	return &result, nil
 }
 
 func (r *TodoRepository) Get(id string) (*models.Todo, error) {
@@ -75,4 +80,26 @@ func (r *TodoRepository) Create(title string) (*models.Todo, error) {
 	}
 
 	return r.Get(id)
+}
+
+func (r *TodoRepository) Update(id string, title *string, isCompleted *bool) (*models.Todo, error) {
+	todo, err := r.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if title != nil {
+		todo.Title = *title
+	}
+	if isCompleted != nil {
+		todo.IsCompleted = *isCompleted
+	}
+	_, err = r.Exec(`
+		UPDATE todo SET title = $2, is_completed = $3
+		WHERE id = $1`,
+		todo.Id, todo.Title, todo.IsCompleted,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return todo, nil
 }
