@@ -1,0 +1,38 @@
+version: "3.9"
+services:
+  backend:
+    build:
+      dockerfile: dockerfiles/backend-dev.dockerfile
+      context: .
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=secretpassword
+      - DB_NAME=todo
+    volumes:
+      - ./backend:/app
+    ports:
+      - 3001:3001
+    depends_on:
+      - db
+  frontend:
+    build:
+      dockerfile: dockerfiles/frontend-dev.dockerfile
+      context: .
+    volumes:
+      - ./frontend:/app
+      - ./frontend/node_modules:/app/node_modules
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=secretpassword
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data:/var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
