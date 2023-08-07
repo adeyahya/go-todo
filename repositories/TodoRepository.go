@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
+	utils "github.com/adeyahya/go-todo/core"
 	"github.com/adeyahya/go-todo/models"
-	"github.com/google/uuid"
 )
 
 type TodoRepository struct {
@@ -68,8 +68,11 @@ func (r *TodoRepository) Get(id string) (*models.Todo, error) {
 }
 
 func (r *TodoRepository) Create(title string) (*models.Todo, error) {
-	id := uuid.NewString()
-	_, err := r.Exec(`
+	id, err := utils.GenerateId()
+	if err != nil {
+		return nil, err
+	}
+	_, err = r.Exec(`
 		INSERT INTO todo(id, title, is_completed, created_at)
 		values($1, $2, $3, $4)`,
 		id, title, false, time.Now(),

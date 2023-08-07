@@ -6,14 +6,17 @@ import (
 	"os"
 
 	"github.com/adeyahya/go-todo/core/middleware"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	muxHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
+	godotenv.Load()
 	SetupDatabase()
 	kernel := ServiceContainer()
 	defer kernel.Db.Close()
