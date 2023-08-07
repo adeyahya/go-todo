@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -17,6 +18,12 @@ import (
 
 func main() {
 	godotenv.Load()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3001"
+	}
+
 	SetupDatabase()
 	kernel := ServiceContainer()
 	defer kernel.Db.Close()
@@ -33,8 +40,8 @@ func main() {
 	router.HandleFunc("/todo/{id}/done", todoHandler.Done).Methods(http.MethodPatch)
 	router.HandleFunc("/todo/{id}/undone", todoHandler.Undone).Methods(http.MethodPatch)
 
-	log.Println("API is running!")
-	http.ListenAndServe(":4000",
+	log.Println(fmt.Sprintf("API is running at port %s", port))
+	http.ListenAndServe(fmt.Sprintf(":%s", port),
 		middleware.OptionsMiddleware(
 			muxHandlers.CompressHandler(
 				muxHandlers.LoggingHandler(os.Stdout, router),
