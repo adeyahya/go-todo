@@ -16,6 +16,17 @@ services:
       - 3001:3001
     depends_on:
       - db
+  frontend:
+    build:
+      dockerfile: dockerfiles/frontend-dev.dockerfile
+      context: .
+    volumes:
+      - ./frontend:/app
+      - ./frontend/node_modules:/app/node_modules
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
   db:
     image: postgres
     environment:
