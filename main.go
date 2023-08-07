@@ -31,5 +31,11 @@ func main() {
 	router.HandleFunc("/todo/{id}/undone", todoHandler.Undone).Methods(http.MethodPatch)
 
 	log.Println("API is running!")
-	http.ListenAndServe(":4000", middleware.OptionsMiddleware(muxHandlers.CompressHandler(muxHandlers.LoggingHandler(os.Stdout, router))))
+	http.ListenAndServe(":4000",
+		middleware.OptionsMiddleware(
+			muxHandlers.CompressHandler(
+				muxHandlers.LoggingHandler(os.Stdout, router),
+			),
+		),
+	)
 }
