@@ -33,6 +33,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Use(middleware.JsonMiddleware)
+	router.Use(middleware.CorsMiddleware)
 
 	router.HandleFunc("/todo", todoHandler.List).Methods(http.MethodGet)
 	router.HandleFunc("/todo", todoHandler.Create).Methods(http.MethodPost)

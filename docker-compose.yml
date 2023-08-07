@@ -23,6 +23,8 @@ services:
     volumes:
       - ./frontend:/app
       - ./frontend/node_modules:/app/node_modules
+    environment:
+      - VITE_BASE_API=http://localhost:3001
     ports:
       - 3000:3000
     depends_on:
