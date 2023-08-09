@@ -1,6 +1,7 @@
 version: "3.9"
 services:
   backend:
+    user: 0:0
     build:
       dockerfile: dockerfiles/backend-dev.dockerfile
       context: .
@@ -17,6 +18,7 @@ services:
     depends_on:
       - db
   frontend:
+    user: 0:0
     build:
       dockerfile: dockerfiles/frontend-dev.dockerfile
       context: .

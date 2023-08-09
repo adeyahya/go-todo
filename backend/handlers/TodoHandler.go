@@ -36,7 +36,7 @@ func (handler *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var todoRequest models.TodoRequestDTO
 	reqBody, _ := io.ReadAll(r.Body)
 	json.Unmarshal(reqBody, &todoRequest)
-	todo, err := handler.TodoRepository.Create(todoRequest.Title)
+	todo, err := handler.TodoRepository.Create(todoRequest.Id, todoRequest.Title)
 	if err != nil {
 		errors.InternalServerError(w, err)
 		return

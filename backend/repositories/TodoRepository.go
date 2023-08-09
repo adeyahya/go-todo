@@ -55,11 +55,11 @@ func (r *TodoRepository) List(limit int, cursor string) (*models.Paginated[model
 
 func (r *TodoRepository) Get(id string) (*models.Todo, error) {
 	row := r.QueryRow(`
-		SELECT id, title, is_completed, created_at FROM todo where id = $1
+		SELECT id, title, is_completed, completed_at, created_at FROM todo where id = $1
 	`, id)
 	var todo models.Todo
 
-	err := row.Scan(&todo.Id, &todo.Title, &todo.IsCompleted, &todo.CreatedAt)
+	err := row.Scan(&todo.Id, &todo.Title, &todo.IsCompleted, &todo.CompletedAt, &todo.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -67,22 +67,30 @@ func (r *TodoRepository) Get(id string) (*models.Todo, error) {
 	return &todo, nil
 }
 
-func (r *TodoRepository) Create(title string) (*models.Todo, error) {
-	id, err := utils.GenerateId()
+func (r *TodoRepository) Create(id *string, title string) (*models.Todo, error) {
+	var err error
+	var _id string
+
+	if id == nil {
+		_id, err = utils.GenerateId()
+	} else {
+		_id = *id
+	}
+
 	if err != nil {
 		return nil, err
 	}
 	_, err = r.Exec(`
 		INSERT INTO todo(id, title, is_completed, created_at)
 		values($1, $2, $3, $4)`,
-		id, title, false, time.Now(),
+		_id, title, false, time.Now(),
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Get(id)
+	return r.Get(_id)
 }
 
 func (r *TodoRepository) Update(id string, title *string, isCompleted *bool) (*models.Todo, error) {
@@ -96,10 +104,17 @@ func (r *TodoRepository) Update(id string, title *string, isCompleted *bool) (*m
 	if isCompleted != nil {
 		todo.IsCompleted = *isCompleted
 	}
+
+	if *isCompleted == true {
+		now := time.Now()
+		todo.CompletedAt = &now
+	} else {
+		todo.CompletedAt = nil
+	}
 	_, err = r.Exec(`
-		UPDATE todo SET title = $2, is_completed = $3
+		UPDATE todo SET title = $2, is_completed = $3, completed_at = $4
 		WHERE id = $1`,
-		todo.Id, todo.Title, todo.IsCompleted,
+		todo.Id, todo.Title, todo.IsCompleted, todo.CompletedAt,
 	)
 	if err != nil {
 		return nil, err

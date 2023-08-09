@@ -33,7 +33,6 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Use(middleware.JsonMiddleware)
-	router.Use(middleware.CorsMiddleware)
 
 	router.HandleFunc("/todo", todoHandler.List).Methods(http.MethodGet)
 	router.HandleFunc("/todo", todoHandler.Create).Methods(http.MethodPost)
@@ -43,9 +42,11 @@ func main() {
 
 	log.Println(fmt.Sprintf("API is running at port %s", port))
 	http.ListenAndServe(fmt.Sprintf(":%s", port),
-		middleware.OptionsMiddleware(
-			muxHandlers.CompressHandler(
-				muxHandlers.LoggingHandler(os.Stdout, router),
+		middleware.CorsMiddleware(
+			middleware.OptionsMiddleware(
+				muxHandlers.CompressHandler(
+					muxHandlers.LoggingHandler(os.Stdout, router),
+				),
 			),
 		),
 	)

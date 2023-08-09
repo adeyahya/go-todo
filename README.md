@@ -13,7 +13,7 @@ docker compose run frontend npm install
 ### create database
 ```bash
 docker compose up db -d
-docker run go-todo-db-1 bash
+docker exec -it go-todo-db-1 bash
 su - postgres
 psql
 create database todo;
