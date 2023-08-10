@@ -9,11 +9,13 @@ import (
 	"github.com/adeyahya/go-todo/core/errors"
 	"github.com/adeyahya/go-todo/models"
 	"github.com/adeyahya/go-todo/repositories"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
 
 type TodoHandler struct {
 	*repositories.TodoRepository
+	*validator.Validate
 }
 
 func (handler *TodoHandler) List(w http.ResponseWriter, r *http.Request) {

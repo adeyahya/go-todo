@@ -4,6 +4,7 @@ import (
 	"os"
 
 	nanoid "github.com/matoous/go-nanoid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type DatabaseConfig struct {
@@ -28,4 +29,18 @@ func GetDatabaseConfig() DatabaseConfig {
 	}
 
 	return databaseConfig
+}
+
+func GeneratePassword(password string) (*string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		return nil, err
+	}
+	hashedPassword := string(bytes)
+	return &hashedPassword, nil
+}
+
+func ComparePassword(hash string, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

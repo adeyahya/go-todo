@@ -9,11 +9,13 @@ import (
 	utils "github.com/adeyahya/go-todo/core"
 	"github.com/adeyahya/go-todo/handlers"
 	"github.com/adeyahya/go-todo/repositories"
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-migrate/migrate/v4"
 )
 
 type kernel struct {
-	Db *sql.DB
+	Db       *sql.DB
+	Validate *validator.Validate
 }
 
 func SetupDatabase() {
@@ -38,9 +40,22 @@ func SetupDatabase() {
 
 func (k *kernel) InjectTodoHandler() handlers.TodoHandler {
 	todoRepository := repositories.TodoRepository{DB: k.Db}
-	todoHandler := handlers.TodoHandler{TodoRepository: &todoRepository}
+	todoHandler := handlers.TodoHandler{
+		TodoRepository: &todoRepository,
+		Validate:       k.Validate,
+	}
 
 	return todoHandler
+}
+
+func (k *kernel) InjectAuthHandler() handlers.AuthHandler {
+	userRepository := repositories.UserRepository{DB: k.Db}
+	authHandler := handlers.AuthHandler{
+		UserRepository: &userRepository,
+		Validate:       k.Validate,
+	}
+
+	return authHandler
 }
 
 var (
@@ -66,6 +81,7 @@ func ServiceContainer() *kernel {
 			if dbErr != nil {
 				log.Fatal(dbErr)
 			}
+			k.Validate = validator.New()
 			k.Db = db
 		})
 	}

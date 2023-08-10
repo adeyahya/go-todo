@@ -30,9 +30,14 @@ func main() {
 
 	// handlers
 	todoHandler := kernel.InjectTodoHandler()
+	authHandler := kernel.InjectAuthHandler()
 
 	router := mux.NewRouter()
 	router.Use(middleware.JsonMiddleware)
+
+	// user handlers
+	router.HandleFunc("/auth/register", authHandler.Register).Methods(http.MethodPost)
+	router.HandleFunc("/auth/login", authHandler.Login).Methods(http.MethodPost)
 
 	router.HandleFunc("/todo", todoHandler.List).Methods(http.MethodGet)
 	router.HandleFunc("/todo", todoHandler.Create).Methods(http.MethodPost)
@@ -40,7 +45,8 @@ func main() {
 	router.HandleFunc("/todo/{id}/done", todoHandler.Done).Methods(http.MethodPatch)
 	router.HandleFunc("/todo/{id}/undone", todoHandler.Undone).Methods(http.MethodPatch)
 
-	log.Println(fmt.Sprintf("API is running at port %s", port))
+	log.Printf("API is running at port %s", port)
+
 	http.ListenAndServe(fmt.Sprintf(":%s", port),
 		middleware.CorsMiddleware(
 			middleware.OptionsMiddleware(

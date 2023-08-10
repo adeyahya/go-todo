@@ -1,2 +1,0 @@
-ALTER TABLE todo
-DROP COLUMN completed_at CASCADE;
